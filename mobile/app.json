@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Pulse",
+    "slug": "pulse-chat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0A0A0A",
+    "splash": {
+      "backgroundColor": "#0A0A0A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pulse.chat"
+    },
+        "icon": "./assets/icon.png",
+    "android": {
+      "package": "com.pulse.chat",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0A0A"
+      }
+    },
+        "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+        "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "backgroundColor": "#0A0A0A",
+          "resizeMode": "contain"
+        }
+      ],
+      "@react-native-google-signin/google-signin",
+      "expo-notifications"
+    ],
+    "owner": "adebote-daniel",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e06e439c-b23f-4ed5-a7fa-502af71c0ece"
+      }
+    }
+  }
+}

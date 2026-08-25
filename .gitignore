@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Django
+*.log
+/staticfiles/
+/media/
+db.sqlite3
+.env
+.env.local
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+package-lock.json
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase
+google-services.json
+serviceAccountKey.json
+
+# Ngrok
+*.ngrok.io
+
+# Docker
+.docker/
+
+# Logs
+logs/
+*.log
+
+# Certificates
+*.crt
+*.key
+
+# Keys/Secrets
+*.pem
+*.p12
+
+mobile/android/

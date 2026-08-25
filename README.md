@@ -1,293 +1,111 @@
-# Chat App Mobile
+# Pulse — Real-Time Chat with AI Assistant
 
-React Native mobile app built with Expo for real-time chat with AI assistant integration.
+Pulse is a full-stack real-time messaging app with 1-to-1 and group chat, an opt-in AI reply assistant, push notifications, and Google/email authentication. Built as a portfolio project demonstrating production-grade engineering practices: clean architecture, JWT auth with token rotation/blacklisting, automated testing, structured logging, error tracking, and CI/CD.
 
-## Setup
+## Tech Stack
 
-### 1. Install Dependencies
-```bash
+**Backend**
+- Django 4.1 + Django REST Framework (REST API)
+- Django Channels + Daphne (WebSocket real-time messaging)
+- PostgreSQL (production) / SQLite (local dev)
+- Redis (production channel layer + Celery broker) / in-memory layer (local dev)
+- Celery (async tasks: AI generation, push notifications)
+- Groq API (`openai/gpt-oss-20b`) for AI-generated reply suggestions
+- Firebase Admin SDK (push notifications)
+- Simple JWT with refresh token rotation + blacklisting
+- Sentry (error tracking)
+
+**Mobile**
+- React Native (Expo SDK 54) + Expo Router
+- Zustand (state management)
+- Axios (HTTP client with auto token refresh)
+- Native Google Sign-In (`@react-native-google-signin/google-signin`)
+- Expo Notifications (FCM push)
+- Jest + jest-expo (testing)
+
+## Features
+
+- 1-to-1 and group chat with real-time delivery over WebSocket
+- Message edit, delete (soft delete), and emoji reactions
+- Typing indicators and online presence
+- AI reply assistant — toggle per conversation, generates a suggested reply which the user can Accept, Edit, or Dismiss
+- Push notifications for new messages and AI suggestions (Firebase Cloud Messaging)
+- Authentication: email/password registration + login, and native Google Sign-In (Android + Web)
+- Dark themed UI (`#0A0A0A` background, `#3B82F6` blue, `#D4AF37` gold accents)
+
+## Project Structure
+
+```
+pulse-chat-app/
+├── backend/                 Django REST API + WebSocket server
+│   ├── apps/
+│   │   ├── users/            Auth, registration, profile, device tokens
+│   │   ├── chat/             Chat rooms, messages, reactions, WebSocket consumer
+│   │   ├── ai_assistant/     AI config + Groq-powered suggestion generation
+│   │   └── notifications/    In-app + push notification records and delivery
+│   └── core/                 Settings, URL routing, ASGI/WSGI entrypoints
+├── mobile/                  Expo React Native app
+│   └── app/
+│       ├── (screens)          Login, register, chats, chat detail, profile, new-group
+│       ├── components/        Shared UI (TopBar, SideMenu)
+│       ├── store/              Zustand stores (auth, chat)
+│       ├── services/           API client
+│       └── hooks/              useWebSocket
+└── docs/
+    └── adr/                  Architecture Decision Records
+```
+
+## Local Development Setup
+
+### Backend
+
+```
+cd backend
+python -m venv venv
+venv\Scripts\activate        # Windows
+pip install -r requirements.txt --break-system-packages
+copy .env.example .env       # then fill in values (see below)
+python manage.py migrate
+python manage.py runserver
+```
+
+Required `.env` values for local dev: `DJANGO_SECRET_KEY`, `GROQ_API_KEY`, `GOOGLE_OAUTH_CLIENT_ID`/`SECRET`, `FIREBASE_CREDENTIALS_JSON`. Leave `DATABASE_URL` and `REDIS_HOST` blank locally — the app automatically falls back to SQLite and an in-memory channel layer (see [ADR-001](docs/adr/001-local-dev-fallbacks.md)).
+
+### Mobile
+
+```
+cd mobile
 npm install
-# or
-yarn install
+copy .env.example .env.local  # fill in EXPO_PUBLIC_* values
+npx eas-cli build --profile development --platform android   # first-time native build
+npm start -- --clear
 ```
 
-### 2. Environment Variables
-Create `.env.local`:
-```env
-EXPO_PUBLIC_API_URL=http://your-backend-url/api
-EXPO_PUBLIC_WS_URL=ws://your-backend-url
-```
-
-For local development with ngrok:
-```bash
-# Start ngrok
-ngrok http 8000
-
-# Update .env.local with ngrok URL
-EXPO_PUBLIC_API_URL=https://your-ngrok-url/api
-EXPO_PUBLIC_WS_URL=wss://your-ngrok-url
-```
-
-### 3. Start Development Server
-```bash
-npm start
-```
-
-Scan QR code with Expo Go app or:
-- Press `a` for Android
-- Press `i` for iOS
-
-## Building APK/IPA
-
-### Prerequisites
-- EAS account (free tier available)
-- GitHub account (connected)
-
-### Android APK
-```bash
-eas build --platform android
-```
-
-After build completes, download APK and install on device:
-```bash
-adb install app.apk
-```
-
-### iOS IPA
-```bash
-eas build --platform ios
-```
-
-## Google Sign-In Setup
-
-### Android Steps
-
-1. **Get SHA-1 Fingerprint:**
-   ```bash
-   keytool -list -v -keystore ~/.android/debug.keystore \
-     -alias androiddebugkey -storepass android -keypass android
-   ```
-
-2. **Configure Google Cloud Console:**
-   - Go to project in Google Cloud Console
-   - OAuth 2.0 Credentials
-   - Add Android app:
-     - SHA-1 fingerprint (from above)
-     - Package name: `com.chatapp.mobile`
-
-3. **Update `app.json`:**
-   ```json
-   {
-     "plugins": [
-       [
-         "expo-google-sign-in",
-         {
-           "androidClientId": "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com"
-         }
-       ]
-     ]
-   }
-   ```
-
-### iOS Steps
-
-1. **Configure Google Cloud Console:**
-   - Add iOS app:
-     - Bundle ID: `com.chatapp.mobile`
-     - App Store ID (if on App Store)
-
-2. **Update `app.json`:**
-   ```json
-   {
-     "plugins": [
-       [
-         "expo-google-sign-in",
-         {
-           "iosClientId": "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com"
-         }
-       ]
-     ]
-   }
-   ```
-
-## File Structure
-
-```
-mobile/
-├── app/
-│   ├── (tabs)/               # Tab navigation layout
-│   ├── screens/
-│   │   ├── login/
-│   │   ├── chats/
-│   │   ├── chat-detail/
-│   │   ├── profile/
-│   │   └── ai-responses/
-│   ├── components/
-│   │   ├── MessageBubble.js
-│   │   ├── ChatItem.js
-│   │   ├── TypingIndicator.js
-│   │   └── ReactionPicker.js
-│   ├── services/
-│   │   └── api.js           # API client
-│   ├── store/
-│   │   ├── authStore.js     # Auth state
-│   │   ├── chatStore.js     # Chat state
-│   │   └── uiStore.js       # UI state
-│   ├── hooks/
-│   │   ├── useWebSocket.js  # WebSocket hook
-│   │   ├── useAuth.js
-│   │   ├── useNotifications.js
-│   │   └── useGoogleSignIn.js
-│   └── utils/
-│       ├── constants.js
-│       ├── validators.js
-│       └── formatters.js
-├── assets/                   # Images, fonts
-├── app.json                  # Expo configuration
-├── eas.json                  # EAS build config
-└── package.json
-```
-
-## Key Hooks
-
-### useWebSocket
-```javascript
-const {
-  connected,
-  sendMessage,
-  sendTyping,
-  stopTyping,
-  sendReaction,
-  editMsg,
-  deleteMsg
-} = useWebSocket(roomId);
-```
-
-### useAuth (Custom)
-```javascript
-const { user, login, logout, isLoading } = useAuth();
-```
-
-### useNotifications (Custom)
-```javascript
-const {
-  notifications,
-  unreadCount,
-  markAsRead,
-  clearAll
-} = useNotifications();
-```
-
-## State Management (Zustand)
-
-### Auth Store
-```javascript
-import { useAuthStore } from '@/store/authStore';
-
-const user = useAuthStore((state) => state.user);
-const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
-```
-
-### Chat Store
-```javascript
-import { useChatStore } from '@/store/chatStore';
-
-const chatRooms = useChatStore((state) => state.chatRooms);
-const messages = useChatStore((state) => state.messages[roomId]);
-const sendMessage = useChatStore((state) => state.sendMessage);
-```
-
-## Network Requests
-
-All API requests go through the centralized `api.js` client:
-
-```javascript
-import { api } from '@/services/api';
-
-// Login
-const data = await api.loginWithGoogle(token);
-
-// Send message
-const message = await api.sendMessage(roomId, content);
-
-// Get notifications
-const notifications = await api.getNotifications();
-```
-
-## Firebase Notifications
-
-Setup Firebase in app:
-
-1. Download `google-services.json` from Firebase Console
-2. Place in `mobile/android/` directory
-3. Update `app.json`:
-   ```json
-   {
-     "android": {
-       "googleServicesFile": "./google-services.json"
-     }
-   }
-   ```
-
-## Performance Optimization
-
-- Messages are virtualized (FlatList/FlashList)
-- Images are cached with React Native Image Cache
-- Zustand selectors prevent unnecessary re-renders
-- WebSocket reconnects automatically
-
-## Development Tips
-
-- Use Expo Go for rapid development
-- Use EAS Build for production builds
-- Test on physical device (iPhone Simulator has limitations)
-- Use React DevTools Debugger: `npm start` → `j` key
-
-## Troubleshooting
-
-### WebSocket Connection Failed
-- Check API URL in `.env.local`
-- Ensure ngrok tunnel is running (mobile dev)
-- Check backend is accessible: `curl https://your-ngrok-url/api/docs/`
-
-### Google Sign-In Fails
-- Verify SHA-1 fingerprint in Google Console
-- Check `app.json` credentials are correct
-- Test on physical device (emulator may have issues)
-
-### Push Notifications Not Working
-- Verify Firebase project is linked
-- Check `google-services.json` is in correct location
-- Test notification permission is granted
-- Check backend is sending notifications
-
-### APK Installation Fails
-- Clear app cache: `adb uninstall com.chatapp.mobile`
-- Check device storage space
-- Verify APK is signed correctly
-
-## Building for Production
-
-1. **Update version in `package.json` and `app.json`**
-2. **Build with EAS:**
-   ```bash
-   eas build --platform android --auto-submit
-   eas build --platform ios --auto-submit
-   ```
-3. **Submit to stores:**
-   ```bash
-   eas submit --platform android
-   eas submit --platform ios
-   ```
+Google Sign-In on Android requires a Development Build, not Expo Go — see [ADR-003](docs/adr/003-native-google-signin.md).
 
 ## Testing
 
-```bash
+**Backend** (28 tests — auth, chat rooms, messaging, AI assistant, notifications):
+```
+cd backend
+python manage.py test
+```
+
+**Mobile** (11 tests — auth store, chat store):
+```
+cd mobile
 npm test
 ```
 
-Run with coverage:
-```bash
-npm test -- --coverage
-```
+## Data Model
+
+See [docs/ERD.md](docs/ERD.md) for the full entity-relationship diagram.
+
+## Architecture Decisions
+
+See [docs/adr/](docs/adr/) for the reasoning behind key technical choices (local dev fallbacks, WebSocket auth, native vs. browser-based Google Sign-In, persistent EAS keystore, error tracking).
+
+## Deployment
+
+- Backend: deployed to Render (see `render.yaml` / CI/CD section)
+- Mobile: distributed as a signed Android APK via EAS Build
