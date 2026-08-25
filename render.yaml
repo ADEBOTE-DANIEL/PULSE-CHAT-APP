@@ -20,26 +20,8 @@ services:
       - key: CORS_ALLOW_ALL
         value: "True"
       - key: DATABASE_URL
-        sync: false
-      - key: REDIS_HOST
-        fromService:
-          name: pulse-redis
-          type: redis
-          property: host
-      - key: REDIS_PORT
-        fromService:
-          name: pulse-redis
-          type: redis
-          property: port
-      - key: CELERY_BROKER_URL
-        fromService:
-          name: pulse-redis
-          type: redis
-          property: connectionString
-      - key: CELERY_RESULT_BACKEND
-        fromService:
-          name: pulse-redis
-          type: redis
+        fromDatabase:
+          name: pulse-db
           property: connectionString
       - key: GROQ_API_KEY
         sync: false
@@ -52,7 +34,6 @@ services:
       - key: SENTRY_DSN
         sync: false
 
-  - type: redis
-    name: pulse-redis
+databases:
+  - name: pulse-db
     plan: free
-    ipAllowList: []
