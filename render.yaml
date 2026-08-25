@@ -4,7 +4,6 @@ services:
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    dockerCommand: web
     plan: free
     healthCheckPath: /health/
     autoDeploy: true
