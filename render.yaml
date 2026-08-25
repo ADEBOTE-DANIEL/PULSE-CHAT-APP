@@ -14,8 +14,6 @@ services:
         generateValue: true
       - key: ALLOWED_HOSTS
         value: "*.onrender.com"
-      - key: CORS_ORIGINS
-        value: "*"
       - key: CORS_ALLOW_ALL
         value: "True"
       - key: DATABASE_URL
