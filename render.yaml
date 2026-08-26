@@ -13,7 +13,7 @@ services:
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: "*.onrender.com"
+        value: "pulse-backend-rdbg.onrender.com"
       - key: CORS_ALLOW_ALL
         value: "True"
       - key: DATABASE_URL
