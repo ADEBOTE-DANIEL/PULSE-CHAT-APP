@@ -5,8 +5,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
-import { useAuthStore } from './store/authStore';
-import { api } from './services/api';
+import { useAuthStore } from '../store/authStore';
+import { api } from '../services/api';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({

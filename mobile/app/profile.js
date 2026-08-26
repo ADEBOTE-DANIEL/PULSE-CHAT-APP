@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from './_layout';
-import { useAuthStore } from './store/authStore';
+import { useAuthStore } from '../store/authStore';
 
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);

@@ -12,7 +12,7 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from './_layout';
-import { api } from './services/api';
+import { api } from '../services/api';
 
 export default function NewGroupScreen() {
   const insets = useSafeAreaInsets();

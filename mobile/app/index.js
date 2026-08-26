@@ -13,7 +13,7 @@ import {
 import { router } from 'expo-router';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { COLORS } from './_layout';
-import { useAuthStore } from './store/authStore';
+import { useAuthStore } from '../store/authStore';
 
 GoogleSignin.configure({
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
@@ -27,26 +27,46 @@ export default function LoginScreen() {
   const isLoading = useAuthStore((s) => s.isLoading);
 
   const handleGoogleLogin = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const response = await GoogleSignin.signIn();
-      console.log('DEBUG Google Sign-In response:', JSON.stringify(response));
+  if (Platform.OS === 'web') {
+    Alert.alert(
+      'Google Sign-In',
+      'Google Sign-In is currently available on the Android app.'
+    );
+    return;
+  }
 
-      if (response.type === 'cancelled') {
-        return;
-      }
+  try {
+    await GoogleSignin.hasPlayServices();
 
-      const idToken = response.data?.idToken || response.idToken;
-      if (!idToken) {
-        throw new Error('No ID token returned');
-      }
-      await loginWithGoogle(idToken);
-      router.replace('/chats');
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-      Alert.alert('Google sign-in failed', 'Please try again.');
+    const response = await GoogleSignin.signIn();
+
+    console.log(
+      'DEBUG Google Sign-In response:',
+      JSON.stringify(response)
+    );
+
+    if (response.type === 'cancelled') {
+      return;
     }
-  };
+
+    const idToken = response.data?.idToken || response.idToken;
+
+    if (!idToken) {
+      throw new Error('No ID token returned');
+    }
+
+    await loginWithGoogle(idToken);
+
+    router.replace('/chats');
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+
+    Alert.alert(
+      'Google sign-in failed',
+      'Please try again.'
+    );
+  }
+};
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -108,12 +128,16 @@ export default function LoginScreen() {
           )}
         </TouchableOpacity>
 
-                <TouchableOpacity
-          style={styles.googleButton}
-          onPress={handleGoogleLogin}
+        {Platform.OS !== 'web' && (
+        <TouchableOpacity
+        style={styles.googleButton}
+        onPress={handleGoogleLogin}
         >
-          <Text style={styles.googleButtonTextActive}>Continue with Google</Text>
+        <Text style={styles.googleButtonTextActive}>
+        Continue with Google
+        </Text>
         </TouchableOpacity>
+)}
 
         <TouchableOpacity style={styles.linkButton} onPress={() => router.push('/register')}>
           <Text style={styles.linkText}>Don't have an account? Sign up</Text>

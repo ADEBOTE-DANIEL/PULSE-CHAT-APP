@@ -63,7 +63,9 @@ export const useAuthStore = create((set, get) => ({
   register: async (email, username, password, firstName, lastName) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await api.register(email, username, password, firstName, lastName);
+     console.log('REGISTER: calling API');
+const data = await api.register(email, username, password, firstName, lastName);
+console.log('REGISTER: API response', data);
       await storage.setItem('access_token', data.access);
       await storage.setItem('refresh_token', data.refresh);
       set({

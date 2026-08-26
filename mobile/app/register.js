@@ -13,35 +13,86 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { COLORS } from './_layout';
-import { useAuthStore } from './store/authStore';
+import { useAuthStore } from '../store/authStore';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
   const register = useAuthStore((s) => s.register);
   const isLoading = useAuthStore((s) => s.isLoading);
 
   const handleRegister = async () => {
+    console.log('CREATE ACCOUNT BUTTON PRESSED');
+
+    console.log('EMAIL:', email);
+    console.log('USERNAME:', username);
+    console.log('PASSWORD LENGTH:', password.length);
+
     if (!email || !username || !password) {
-      Alert.alert('Missing info', 'Please fill in email, username, and password.');
+      Alert.alert(
+        'Missing info',
+        'Please fill in email, username, and password.'
+      );
       return;
     }
+
     if (password.length < 8) {
-      Alert.alert('Password too short', 'Password must be at least 8 characters.');
+      Alert.alert(
+        'Password too short',
+        'Password must be at least 8 characters.'
+      );
       return;
     }
+
     if (password !== confirmPassword) {
-      Alert.alert('Passwords do not match', 'Please make sure both passwords match.');
+      Alert.alert(
+        'Passwords do not match',
+        'Please make sure both passwords match.'
+      );
       return;
     }
+
     try {
-      await register(email.trim(), username.trim(), password);
+      console.log('CALLING AUTH STORE REGISTER');
+
+      const result = await register(
+        email.trim(),
+        username.trim(),
+        password
+      );
+
+      console.log('AUTH STORE REGISTER COMPLETED');
+      console.log('REGISTER RESULT:', result);
+
       router.replace('/chats');
     } catch (error) {
-      const detail = error.response?.data;
-      const message = detail?.email?.[0] || detail?.username?.[0] || detail?.password?.[0] || 'Please check your details and try again.';
+      console.error('REGISTRATION ERROR:', error);
+      console.error('STATUS:', error?.response?.status);
+      console.error('DATA:', error?.response?.data);
+
+      const detail = error?.response?.data;
+
+      let message = 'Registration failed. Please try again.';
+
+      if (detail) {
+        if (detail.email) {
+          message = `Email: ${detail.email[0]}`;
+        } else if (detail.username) {
+          message = `Username: ${detail.username[0]}`;
+        } else if (detail.password) {
+          message = `Password: ${detail.password[0]}`;
+        } else if (detail.detail) {
+          message = detail.detail;
+        } else {
+          message = JSON.stringify(detail);
+        }
+      } else if (error?.message) {
+        message = error.message;
+      }
+
       Alert.alert('Registration failed', message);
     }
   };
@@ -51,16 +102,21 @@ export default function RegisterScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.logoWrap}>
           <View style={styles.logoBadge}>
             <Text style={styles.logoText}>PULSE</Text>
           </View>
+
           <Text style={styles.appName}>Create Account</Text>
         </View>
 
         <View style={styles.form}>
           <Text style={styles.label}>Email</Text>
+
           <TextInput
             style={styles.input}
             placeholder="you@example.com"
@@ -72,6 +128,7 @@ export default function RegisterScreen() {
           />
 
           <Text style={styles.label}>Username</Text>
+
           <TextInput
             style={styles.input}
             placeholder="username"
@@ -82,6 +139,7 @@ export default function RegisterScreen() {
           />
 
           <Text style={styles.label}>Password</Text>
+
           <TextInput
             style={styles.input}
             placeholder="At least 8 characters"
@@ -92,6 +150,7 @@ export default function RegisterScreen() {
           />
 
           <Text style={styles.label}>Confirm Password</Text>
+
           <TextInput
             style={styles.input}
             placeholder="••••••••"
@@ -113,8 +172,13 @@ export default function RegisterScreen() {
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.linkButton} onPress={() => router.back()}>
-            <Text style={styles.linkText}>Already have an account? Sign in</Text>
+          <TouchableOpacity
+            style={styles.linkButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.linkText}>
+              Already have an account? Sign in
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -123,9 +187,23 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scrollContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 },
-  logoWrap: { alignItems: 'center', marginBottom: 36 },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+  },
+
+  logoWrap: {
+    alignItems: 'center',
+    marginBottom: 36,
+  },
+
   logoBadge: {
     paddingHorizontal: 24,
     paddingVertical: 14,
@@ -137,10 +215,32 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.blue,
   },
-  logoText: { fontSize: 22, fontWeight: '800', color: COLORS.gold, letterSpacing: 3 },
-  appName: { fontSize: 24, fontWeight: '700', color: COLORS.white, letterSpacing: 1 },
-  form: { width: '100%' },
-  label: { color: COLORS.textSecondary, fontSize: 13, marginBottom: 6, marginTop: 14 },
+
+  logoText: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: COLORS.gold,
+    letterSpacing: 3,
+  },
+
+  appName: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.white,
+    letterSpacing: 1,
+  },
+
+  form: {
+    width: '100%',
+  },
+
+  label: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    marginBottom: 6,
+    marginTop: 14,
+  },
+
   input: {
     backgroundColor: COLORS.surface,
     borderWidth: 1,
@@ -150,6 +250,7 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 15,
   },
+
   button: {
     backgroundColor: COLORS.gold,
     borderRadius: 12,
@@ -157,7 +258,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 28,
   },
-  buttonText: { color: '#000', fontWeight: '700', fontSize: 16 },
-  linkButton: { marginTop: 18, alignItems: 'center' },
-  linkText: { color: COLORS.textSecondary, fontSize: 13 },
+
+  buttonText: {
+    color: '#000',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+
+  linkButton: {
+    marginTop: 18,
+    alignItems: 'center',
+  },
+
+  linkText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+  },
 });

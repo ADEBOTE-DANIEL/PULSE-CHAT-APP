@@ -13,10 +13,10 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../_layout';
-import { useChatStore } from '../store/chatStore';
-import { useAuthStore } from '../store/authStore';
-import { api } from '../services/api';
-import { useWebSocket } from '../hooks/useWebSocket';
+import { useChatStore } from '../../store/chatStore';
+import { useAuthStore } from '../../store/authStore';
+import { api } from '../../services/api';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
 export default function ChatDetailScreen() {
   const { id } = useLocalSearchParams();

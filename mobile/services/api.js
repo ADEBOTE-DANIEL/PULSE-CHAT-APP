@@ -3,6 +3,9 @@ import { storage } from '../utils/storage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api';
 
+console.log('API_URL:', API_URL);
+console.log('REGISTER ENDPOINT:', `${API_URL}/auth/register/`);
+
 class APIClient {
   constructor() {
         this.client = axios.create({

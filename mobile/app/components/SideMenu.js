@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, Animated } from 'react
 import { useEffect, useRef } from 'react';
 import { router } from 'expo-router';
 import { COLORS } from '../_layout';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../../store/authStore';
 
 export default function SideMenu({ visible, onClose }) {
   const slideAnim = useRef(new Animated.Value(-280)).current;
