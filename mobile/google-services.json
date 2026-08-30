@@ -12,7 +12,16 @@
           "package_name": "com.pulse.chat"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "800420152159-7ib4740ragpggcmvlqjc3du8j3ej7ql1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pulse.chat",
+            "certificate_hash": "4ade1bb830c4ee8bf7d21160f7eb4b56f7747645"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCUW6x-zIhv7bblS8xViNgARXnvvGnr15s"
